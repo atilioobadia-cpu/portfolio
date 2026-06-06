@@ -1,0 +1,29 @@
+# Common files to ignore
+*.exe
+*.phar
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Excel and data files
+*.xlsx
+*.csv
+*.pptx
+*.pdf
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CoA Setup directory
+CoA Setup/
+
+# Environment
+.env
+.env.local

@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERPNext.Atilio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   CSS VARIABLES — Frappe Light Theme
+══════════════════════════════════════════ */
+:root {
+  --bg:           #f4f5f7;
+  --surface:      #ffffff;
+  --surface2:     #f9fafb;
+  --border:       #e2e8f0;
+  --border2:      #d1d8e2;
+  --text:         #1a1f2e;
+  --text2:        #374151;
+  --muted:        #6b7280;
+  --muted2:       #9ca3af;
+  --primary:      #171717;
+  --primary-bg:   #f3f4f6;
+  --accent:       #374151;
+  --sidebar-w:    220px;
+  --sidebar-w-c:  52px;
+  --topbar-h:     48px;
+  --radius:       8px;
+  --radius-sm:    6px;
+  --font:         'Inter', system-ui, sans-serif;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow:       0 4px 12px rgba(0,0,0,.06);
+  --transition:   all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;font-size:14px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  overflow-x:hidden;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+a{text-decoration:none;color:inherit}
+
+/* ══════════════════════════════════════════
+   TOPBAR — Frappe style
+══════════════════════════════════════════ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;
+  height:var(--topbar-h);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 16px;
+  z-index:300;
+  gap:12px;
+}
+.topbar-hamburger{
+  width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;
+  color:var(--muted);cursor:pointer;
+  border-radius:5px;
+  transition:background .18s,color .18s;
+  flex-shrink:0;
+}
+.topbar-hamburger:hover{background:var(--primary-bg);color:var(--text)}
+.topbar-brand{
+  font-size:.9rem;font-weight:700;
+  color:var(--text);letter-spacing:-.02em;
+  margin-left:2px;
+}
+.topbar-brand span{color:var(--muted)}
+.topbar-spacer{flex:1}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-badge{
+  display:flex;align-items:center;gap:5px;
+  background:var(--primary-bg);
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:4px 10px;border-radius:20px;
+  font-size:.72rem;font-weight:500;
+}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#22c55e;
+  animation:blink 2.5s ease infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ══════════════════════════════════════════
+   SIDEBAR — Frappe exact style
+══════════════════════════════════════════ */
+.sidebar{
+  position:fixed;
+  left:0;top:var(--topbar-h);bottom:0;
+  width:var(--sidebar-w);
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  z-index:200;
+  overflow:hidden;
+  transition:width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar.collapsed{width:var(--sidebar-w-c)}
+
+.sidebar-inner{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:8px 0;
+}
+.sidebar-inner::-webkit-scrollbar{width:0}
+
+/* Section label */
+.sb-section{
+  padding:16px 14px 4px;
+  font-size:.65rem;font-weight:600;
+  letter-spacing:.1em;color:var(--muted2);
+  text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;
+  transition:opacity 0.35s ease, padding 0.35s ease;
+}
+.sidebar.collapsed .sb-section{opacity:0;padding-top:8px;padding-bottom:0;height:0}
+
+/* Nav item */
+.nav-item{
+  display:flex;align-items:center;
+  gap:10px;
+  padding:7px 10px 7px 12px;
+  margin:1px 6px;
+  border-radius:6px;
+  cursor:pointer;
+  color:var(--muted);
+  border:none;background:transparent;
+  font-family:var(--font);
+  font-size:.85rem;font-weight:500;
+  white-space:nowrap;
+  width:calc(100% - 12px);
+  transition:background 0.18s ease, color 0.18s ease;
+  text-align:left;
+}
+.nav-item:hover{
+  background:var(--primary-bg);
+  color:var(--text);
+}
+.nav-icon{
+  width:16px;height:16px;
+  flex-shrink:0;opacity:.7;
+  transition:opacity .18s;
+}
+.nav-item.active .nav-icon,
+.nav-item:hover .nav-icon{opacity:1}
+
+.nav-label{
+  transition:opacity 0.35s ease, transform 0.35s ease;
+  opacity:1;transform:translateX(0);
+}
+.sidebar.collapsed .nav-label{
+  opacity:0;transform:translateX(-8px);
+  pointer-events:none;
+}
+
+.sb-divider{
+  height:1px;background:var(--border);
+  margin:8px 12px;
+  transition:opacity 0.35s ease;
+}
+
+/* Sidebar footer/profile */
+.sb-profile{
+  border-top:1px solid var(--border);
+  padding:10px 12px;
+  display:flex;align-items:center;gap:10px;
+  overflow:hidden;flex-shrink:0;
+}
+.sb-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--text);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;font-weight:700;flex-shrink:0;
+  letter-spacing:.02em;
+}
+.sb-profile-info{
+  transition:opacity 0.35s ease;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.sidebar.collapsed .sb-profile-info{opacity:0}
+.sb-name{font-size:.8rem;font-weight:600;color:var(--text)}
+.sb-role{font-size:.68rem;color:var(--muted)}
+
+/* ══════════════════════════════════════════
+   MAIN CONTENT
+══════════════════════════════════════════ */
+.main-wrap{
+  margin-top:var(--topbar-h);
+  margin-left:var(--sidebar-w);
+  flex:1;
+  transition:margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height:calc(100vh - var(--topbar-h));
+  display:flex;flex-direction:column;
+}
+.main-wrap.collapsed{margin-left:var(--sidebar-w-c)}
+
+/* ══════════════════════════════════════════
+   TAB PAGES — smooth transition
+══════════════════════════════════════════ */
+.tab-page{
+  display:none;
+  opacity:1;
+  padding:28px 32px;
+  max-width:1100px;
+  width:100%;
+  flex:1;
+}
+.tab-page.active{
+  display:block;
+  animation:pageEnter 0.38s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes pageEnter{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ══════════════════════════════════════════
+   PAGE HEADER — Frappe style
+══════════════════════════════════════════ */
+.page-head{
+  margin-bottom:24px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-end;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.page-head-left{}
+.page-tag{
+  font-size:.68rem;font-weight:600;
+  letter-spacing:.1em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:5px;
+}
+.page-title{
+  font-size:1.5rem;font-weight:700;
+  letter-spacing:-.03em;color:var(--text);
+}
+.page-sub{
+  color:var(--muted);font-size:.82rem;
+  line-height:1.6;margin-top:5px;
+}
+
+/* ══════════════════════════════════════════
+   COMPONENTS
+══════════════════════════════════════════ */
+
+/* Cards */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px;
+  transition:box-shadow .2s ease, border-color .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow);
+  border-color:var(--border2);
+}
+
+/* Grids */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* Section label */
+.sec-lbl{
+  display:flex;align-items:center;gap:8px;
+  font-size:.68rem;font-weight:600;
+  letter-spacing:.1em;color:var(--muted);
+  text-transform:uppercase;
+  margin-bottom:12px;margin-top:24px;
+}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Stat cards */
+.stat-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  transition:box-shadow .2s ease;
+}
+.stat-card:hover{box-shadow:var(--shadow)}
+.stat-num{
+  font-size:1.6rem;font-weight:800;
+  letter-spacing:-.04em;color:var(--text);
+  line-height:1;margin-bottom:3px;
+}
+.stat-lbl{font-size:.72rem;color:var(--muted);font-weight:500}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:7px;padding:7px 14px;
+  border-radius:6px;
+  font-family:var(--font);font-size:.82rem;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);
+  transition:all .18s ease;
+  text-decoration:none;letter-spacing:-.01em;
+  white-space:nowrap;
+}
+.btn:hover{background:var(--primary-bg);border-color:var(--border2)}
+.btn-primary{
+  background:var(--text);color:#fff;
+  border-color:var(--text);
+}
+.btn-primary:hover{background:#374151;border-color:#374151}
+svg.btn-ic{width:13px;height:13px;flex-shrink:0}
+
+/* ══════════════════════════════════════════
+   HOME PAGE
+══════════════════════════════════════════ */
+.hero-grid{
+  display:grid;grid-template-columns:1fr 380px;
+  gap:20px;align-items:start;margin-bottom:24px;
+}
+.hero-status{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--primary-bg);
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:4px 10px;border-radius:4px;
+  font-size:.72rem;font-weight:500;
+  margin-bottom:14px;
+}
+.hero-name{
+  font-size:2.2rem;font-weight:800;
+  letter-spacing:-.05em;line-height:1.05;
+  color:var(--text);margin-bottom:8px;
+}
+.hero-role{
+  color:var(--muted);font-size:.88rem;
+  line-height:1.6;margin-bottom:20px;
+  max-width:420px;
+}
+.hero-role strong{color:var(--text2);font-weight:600}
+
+/* Stats row */
+.stats-row{
+  display:flex;gap:0;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;margin-bottom:20px;
+  background:var(--surface);
+}
+.stat-item{
+  flex:1;padding:12px 14px;
+  border-right:1px solid var(--border);
+  transition:background .18s;
+}
+.stat-item:last-child{border-right:none}
+.stat-item:hover{background:var(--primary-bg)}
+.stat-n{font-size:1.2rem;font-weight:700;color:var(--text);letter-spacing:-.03em}
+.stat-l{font-size:.68rem;color:var(--muted);margin-top:1px}
+
+/* Dashboard right panel */
+.dash-panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.dash-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface2);
+}
+.dash-tb-title{font-size:.78rem;font-weight:600;color:var(--text)}
+.dash-tb-dots{display:flex;gap:4px}
+.dash-dot{width:8px;height:8px;border-radius:50%}
+
+.dash-module{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  transition:background .15s;cursor:default;
+}
+.dash-module:last-child{border-bottom:none}
+.dash-module:hover{background:var(--primary-bg)}
+.dm-icon{
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.dm-name{font-size:.8rem;font-weight:600;color:var(--text)}
+.dm-sub{font-size:.68rem;color:var(--muted)}
+.dm-status{
+  margin-left:auto;font-size:.68rem;font-weight:500;
+  color:var(--muted);display:flex;align-items:center;gap:3px;
+}
+.dm-status.on{color:#16a34a}
+
+/* About cards */
+.about-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
+
+/* Chip tags */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.chip{
+  background:var(--primary-bg);
+  border:1px solid var(--border);
+  color:var(--text2);
+  padding:3px 9px;border-radius:4px;
+  font-size:.72rem;font-weight:500;
+}
+
+/* ══════════════════════════════════════════
+   SERVICES
+══════════════════════════════════════════ */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.svc-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px;
+  transition:box-shadow .2s ease, border-color .2s ease;
+  cursor:default;
+}
+.svc-card:hover{
+  box-shadow:var(--shadow);
+  border-color:var(--border2);
+}
+.svc-icon{
+  width:34px;height:34px;
+  background:var(--primary-bg);
+  border:1px solid var(--border);
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:12px;
+  color:var(--text2);
+  transition:background .18s;
+}
+.svc-card:hover .svc-icon{background:#f1f3f5}
+.svc-name{font-size:.88rem;font-weight:600;margin-bottom:5px;color:var(--text)}
+.svc-desc{color:var(--muted);font-size:.78rem;line-height:1.55}
+
+/* ERP feature card */
+.erp-full{
+  grid-column:1/-1;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+.erp-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.erp-ico{
+  width:34px;height:34px;border-radius:6px;
+  background:var(--text);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.erp-title{font-size:.95rem;font-weight:700;color:var(--text)}
+.erp-sub{font-size:.72rem;color:var(--muted)}
+.erp-desc{color:var(--muted);font-size:.82rem;line-height:1.65;margin-bottom:14px;max-width:700px}
+.erp-tags{display:flex;flex-wrap:wrap;gap:5px}
+.erp-tag{
+  background:var(--primary-bg);
+  border:1px solid var(--border);
+  color:var(--text2);
+  padding:3px 9px;border-radius:4px;
+  font-size:.72rem;font-weight:500;
+}
+
+/* Process steps */
+.process{margin-top:4px}
+.proc-item{
+  display:flex;gap:14px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+.proc-item:last-child{border-bottom:none}
+.proc-n{
+  width:24px;height:24px;border-radius:50%;
+  border:1px solid var(--border2);
+  background:var(--primary-bg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;color:var(--text2);
+  flex-shrink:0;margin-top:1px;
+}
+.proc-title{font-size:.85rem;font-weight:600;margin-bottom:2px;color:var(--text)}
+.proc-desc{color:var(--muted);font-size:.78rem;line-height:1.5}
+
+/* ══════════════════════════════════════════
+   PROJECTS
+══════════════════════════════════════════ */
+.proj-table{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.proj-table-hd{
+  display:grid;grid-template-columns:2fr 1fr 2fr 100px;
+  padding:10px 16px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  font-size:.7rem;font-weight:600;
+  letter-spacing:.06em;color:var(--muted);
+  text-transform:uppercase;
+}
+.proj-row{
+  display:grid;grid-template-columns:2fr 1fr 2fr 100px;
+  padding:13px 16px;
+  border-bottom:1px solid var(--border);
+  align-items:center;
+  transition:background .15s;
+}
+.proj-row:last-child{border-bottom:none}
+.proj-row:hover{background:var(--surface2)}
+.proj-name{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:2px}
+.proj-tech{font-size:.72rem;color:var(--muted)}
+.proj-tag{
+  display:inline-flex;padding:2px 8px;border-radius:4px;
+  font-size:.7rem;font-weight:500;
+  border:1px solid var(--border);
+  background:var(--primary-bg);color:var(--muted);
+}
+.proj-desc-cell{color:var(--muted);font-size:.78rem;line-height:1.5}
+.proj-link-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.75rem;color:var(--muted);
+  transition:color .15s;
+  background:none;border:none;cursor:pointer;
+  font-family:var(--font);
+}
+.proj-link-btn:hover{color:var(--text)}
+
+/* Also keep card view for mobile */
+.proj-cards{display:none}
+.proj-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  margin-bottom:10px;
+  transition:box-shadow .2s, border-color .2s;
+}
+.proj-card:hover{box-shadow:var(--shadow);border-color:var(--border2)}
+.pc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pc-name{font-size:.9rem;font-weight:600;margin-bottom:5px}
+.pc-desc{font-size:.78rem;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.pills{display:flex;flex-wrap:wrap;gap:4px}
+.pill{
+  background:var(--primary-bg);border:1px solid var(--border);
+  color:var(--muted);padding:2px 7px;border-radius:4px;font-size:.68rem;
+}
+
+/* ══════════════════════════════════════════
+   SKILLS
+══════════════════════════════════════════ */
+.skill-list{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.skill-item{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.skill-item:last-child{border-bottom:none}
+.skill-item:hover{background:var(--surface2)}
+.sk-icon{
+  width:28px;height:28px;border-radius:6px;
+  background:var(--primary-bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);flex-shrink:0;
+}
+.sk-name{font-size:.83rem;font-weight:600;color:var(--text);width:160px;flex-shrink:0}
+.sk-bar-wrap{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.sk-bar{
+  height:100%;border-radius:3px;
+  background:var(--text);
+  width:0%;
+  transition:width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.sk-pct{font-size:.75rem;font-weight:600;color:var(--text2);width:38px;text-align:right;flex-shrink:0}
+
+/* Tool grid */
+.tool-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:8px;margin-top:0;
+}
+.tool-item{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:10px 12px;
+  display:flex;align-items:center;gap:8px;
+  transition:box-shadow .18s,border-color .18s;
+  font-size:.78rem;font-weight:500;color:var(--text2);
+}
+.tool-item:hover{box-shadow:var(--shadow-sm);border-color:var(--border2)}
+.tool-ic{
+  width:22px;height:22px;
+  color:var(--muted);flex-shrink:0;
+}
+
+/* ══════════════════════════════════════════
+   CONTACT
+══════════════════════════════════════════ */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.contact-link{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:13px 15px;
+  margin-bottom:8px;color:var(--text);
+  transition:box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+}
+.contact-link:hover{
+  box-shadow:var(--shadow);
+  border-color:var(--border2);
+  transform:translateX(2px);
+}
+.c-ico{
+  width:32px;height:32px;border-radius:6px;
+  background:var(--primary-bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);flex-shrink:0;
+}
+.c-lbl{font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1px}
+.c-val{font-size:.83rem;font-weight:500}
+.c-arr{margin-left:auto;color:var(--muted2);transition:all .2s}
+.contact-link:hover .c-arr{color:var(--text);transform:translateX(2px)}
+
+.cta-card{
+  background:var(--text);
+  border-radius:var(--radius);
+  padding:22px;color:#fff;
+}
+.cta-card h3{font-size:1rem;font-weight:700;margin-bottom:6px;letter-spacing:-.02em}
+.cta-card p{font-size:.8rem;line-height:1.6;opacity:.7;margin-bottom:16px}
+.btn-white{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 16px;border-radius:6px;
+  background:#fff;color:var(--text);
+  font-family:var(--font);font-size:.82rem;font-weight:600;
+  border:none;cursor:pointer;width:100%;justify-content:center;
+  transition:background .18s;text-decoration:none;
+}
+.btn-white:hover{background:#f3f4f6}
+.cta-trust{
+  display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;
+}
+.cta-trust span{
+  font-size:.7rem;opacity:.6;
+  display:flex;align-items:center;gap:4px;
+}
+
+/* Location card */
+.loc-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 15px;
+  display:flex;align-items:center;gap:12px;margin-top:8px;
+}
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer{
+  margin-left:var(--sidebar-w);
+  border-top:1px solid var(--border);
+  padding:12px 32px;
+  display:flex;justify-content:space-between;align-items:center;
+  color:var(--muted);font-size:.72rem;
+  background:var(--surface);
+  transition:margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+footer.collapsed{margin-left:var(--sidebar-w-c)}
+
+/* ══════════════════════════════════════════
+   MOBILE — bottom nav
+══════════════════════════════════════════ */
+.mob-nav{display:none}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main-wrap{margin-left:0!important}
+  footer{margin-left:0!important;flex-direction:column;gap:4px;text-align:center;padding:12px 16px}
+  .topbar{padding:0 12px}
+  .topbar-hamburger{display:none}
+  .tab-page{padding:16px 14px 90px}
+  .hero-grid{grid-template-columns:1fr}
+  .dash-panel{display:none}
+  .grid-2,.grid-3,.grid-4,.about-grid,.contact-grid{grid-template-columns:1fr}
+  .svc-grid{grid-template-columns:repeat(2,1fr)}
+  .proj-table{display:none}
+  .proj-cards{display:block}
+  .tool-grid{grid-template-columns:repeat(2,1fr)}
+  .skill-list .sk-name{width:110px}
+  .hero-name{font-size:1.8rem}
+  .page-title{font-size:1.3rem}
+  .page-head{flex-direction:column;align-items:flex-start;gap:10px}
+  .stats-row{flex-wrap:wrap}
+  .stat-item{min-width:50%}
+
+  .mob-nav{
+    display:flex;
+    position:fixed;bottom:8px;left:12px;right:12px;
+    background:rgba(255,255,255,.97);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:6px 8px;
+    z-index:400;
+    box-shadow:0 4px 20px rgba(0,0,0,.1);
+    justify-content:space-between;
+  }
+  .mn-btn{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;gap:2px;
+    padding:6px 4px;border-radius:16px;
+    color:var(--muted2);font-size:.6rem;font-weight:600;
+    letter-spacing:.02em;cursor:pointer;
+    transition:background .18s, color .18s;
+    border:none;background:transparent;font-family:var(--font);
+  }
+  .mn-btn svg{width:18px;height:18px}
+  .mn-btn.active{color:var(--text);background:var(--primary-bg)}
+  .mn-btn:hover{color:var(--text2)}
+}
+
+/* ══════════════════════════════════════════
+   NAV ACTIVE INDICATOR — Frappe left border
+══════════════════════════════════════════ */
+.nav-item.active{
+  background:var(--primary-bg);
+  color:var(--text);
+  font-weight:600;
+  position:relative;
+}
+.nav-item.active::before{
+  content:'';
+  position:absolute;left:0;top:4px;bottom:4px;
+  width:3px;border-radius:0 3px 3px 0;
+  background:var(--text);
+}
+
+/* Loading spinner on nav click */
+.nav-item.loading .nav-icon{
+  animation:spin .6s linear infinite;
+}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.breadcrumb{
+  display:flex;align-items:center;gap:6px;
+  font-size:.75rem;color:var(--muted);
+  margin-bottom:20px;
+  padding-bottom:0;
+}
+.breadcrumb span{color:var(--muted2)}
+.breadcrumb strong{color:var(--text);font-weight:500}
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════ TOPBAR ════════════════ -->
+<header class="topbar">
+  <button class="topbar-hamburger" onclick="toggleSidebar()" title="Toggle sidebar">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <div class="topbar-brand">erp<span>.</span>atilio</div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-right">
+    <div class="topbar-badge">
+      <div class="status-dot"></div>
+      Available for Projects
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-inner">
+    <div class="sb-section">Navigation</div>
+
+    <button class="nav-item active" id="nav-home" onclick="showTab('home')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span class="nav-label">Home</span>
+    </button>
+
+    <button class="nav-item" id="nav-services" onclick="showTab('services')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      <span class="nav-label">Services</span>
+    </button>
+
+    <button class="nav-item" id="nav-projects" onclick="showTab('projects')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="nav-label">Projects</span>
+    </button>
+
+    <button class="nav-item" id="nav-skills" onclick="showTab('skills')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+      <span class="nav-label">Skills</span>
+    </button>
+
+    <div class="sb-divider"></div>
+    <div class="sb-section">Contact</div>
+
+    <button class="nav-item" id="nav-contact" onclick="showTab('contact')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+      </svg>
+      <span class="nav-label">Contact</span>
+    </button>
+
+    <button class="nav-item" onclick="window.open('path/to/your/cv.pdf', '_blank')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      <span class="nav-label">Download CV</span>
+    </button>
+  </div>
+
+  <div class="sb-profile">
+    <div class="sb-avatar">AO</div>
+    <div class="sb-profile-info">
+      <div class="sb-name">Atilio Obadia</div>
+      <div class="sb-role">IT Solutions Expert</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN WRAP ════════════════ -->
+<div class="main-wrap" id="mainWrap">
+
+  <!-- ════ HOME ════ -->
+  <div class="tab-page active" id="tab-home">
+    <div class="breadcrumb"><strong>Home</strong></div>
+
+    <div class="hero-grid">
+      <div>
+        <div class="hero-status">
+          <div class="status-dot"></div>
+          Open for new projects
+        </div>
+        <h1 class="hero-name">Atilio Obadia</h1>
+        <p class="hero-role">
+          <strong>IT & ERPNext Expert</strong> based in Tanzania.<br>
+          Web Development, System Dev, Cloud Servers, ERP Systems & IT Services.
+        </p>
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-n">50+</div><div class="stat-l">Projects Delivered</div></div>
+          <div class="stat-item"><div class="stat-n">5+</div><div class="stat-l">Years Experience</div></div>
+          <div class="stat-item"><div class="stat-n">100%</div><div class="stat-l">Dedicated</div></div>
+          <div class="stat-item"><div class="stat-n">TZ</div><div class="stat-l">Tanzania Based</div></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="showTab('contact')">
+            <svg class="btn-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Get in Touch
+          </button>
+          <button class="btn" onclick="showTab('projects')">
+            <svg class="btn-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Work
+          </button>
+          <button class="btn" onclick="showTab('services')">
+            <svg class="btn-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Services
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Panel -->
+      <div class="dash-panel">
+        <div class="dash-topbar">
+          <div class="dash-tb-title">erp.atilio — Modules</div>
+          <div class="dash-tb-dots">
+            <div class="dash-dot" style="background:#ef4444"></div>
+            <div class="dash-dot" style="background:#f59e0b"></div>
+            <div class="dash-dot" style="background:#22c55e"></div>
+          </div>
+        </div>
+        <div class="dash-module">
+          <div class="dm-icon" style="background:#f3f4f6;border:1px solid #e2e8f0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div><div class="dm-name">Web Development</div><div class="dm-sub">React · Node.js · PHP</div></div>
+          <div class="dm-status on">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3"/></svg>Active
+          </div>
+        </div>
+        <div class="dash-module">
+          <div class="dm-icon" style="background:#f3f4f6;border:1px solid #e2e8f0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div><div class="dm-name">ERP Systems</div><div class="dm-sub">ERPNext · Frappe</div></div>
+          <div class="dm-status on">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3"/></svg>Active
+          </div>
+        </div>
+        <div class="dash-module">
+          <div class="dm-icon" style="background:#f3f4f6;border:1px solid #e2e8f0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
+          </div>
+          <div><div class="dm-name">Cloud Servers</div><div class="dm-sub">Linux · Nginx · Docker</div></div>
+          <div class="dm-status on">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3"/></svg>Active
+          </div>
+        </div>
+        <div class="dash-module">
+          <div class="dm-icon" style="background:#f3f4f6;border:1px solid #e2e8f0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div><div class="dm-name">System Development</div><div class="dm-sub">Python · MySQL · APIs</div></div>
+          <div class="dm-status on">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3"/></svg>Active
+          </div>
+        </div>
+        <div class="dash-module">
+          <div class="dm-icon" style="background:#f3f4f6;border:1px solid #e2e8f0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div><div class="dm-name">IT Services & Support</div><div class="dm-sub">Network · Security · 24/7</div></div>
+          <div class="dm-status on">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3"/></svg>Active
+          </div>
+        </div>
+        <div style="padding:8px 14px;border-top:1px solid var(--border);display:flex;justify-content:space-between">
+          <span style="font-size:.7rem;color:var(--muted)">All systems operational</span>
+          <span style="font-size:.7rem;color:#16a34a;font-weight:500">● Online</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="sec-lbl">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      About
+    </div>
+    <div class="about-grid">
+      <div class="card">
+        <p style="font-size:.85rem;line-height:1.75;color:var(--text2)">
+          I'm <strong style="color:var(--text)">Atilio Obadia</strong> — an IT professional based in <strong style="color:var(--text)">Tanzania</strong> with 5+ years of experience building digital solutions that businesses rely on every day. I specialise in ERPNext implementation, custom system development, cloud infrastructure, and end-to-end IT services.
+        </p>
+        <div class="chips">
+          <span class="chip">ERPNext</span><span class="chip">Frappe</span>
+          <span class="chip">Python</span><span class="chip">JavaScript</span>
+          <span class="chip">React</span><span class="chip">Node.js</span>
+          <span class="chip">Linux</span><span class="chip">Docker</span>
+          <span class="chip">MySQL</span><span class="chip">Nginx</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card" style="display:flex;align-items:center;gap:10px;padding:13px 14px">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg></div>
+          <div><div style="font-size:.8rem;font-weight:600">Cloud & Infrastructure</div><div style="font-size:.7rem;color:var(--muted)">VPS · Nginx · Docker · SSL</div></div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:10px;padding:13px 14px">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+          <div><div style="font-size:.8rem;font-weight:600">ERP Implementation</div><div style="font-size:.7rem;color:var(--muted)">ERPNext · Full Setup · Training</div></div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:10px;padding:13px 14px">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <div><div style="font-size:.8rem;font-weight:600">Full Stack Web</div><div style="font-size:.7rem;color:var(--muted)">React · Node.js · PHP · MySQL</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SERVICES ════ -->
+  <div class="tab-page" id="tab-services">
+    <div class="breadcrumb"><span>Home</span> / <strong>Services</strong></div>
+    <div class="page-head">
+      <div class="page-head-left">
+        <div class="page-tag">What I Offer</div>
+        <h1 class="page-title">IT Services</h1>
+        <p class="page-sub">End-to-end technology solutions for businesses across Tanzania and beyond.</p>
+      </div>
+      <button class="btn btn-primary" onclick="showTab('contact')">Get a Quote</button>
+    </div>
+
+    <div class="svc-grid">
+      <div class="svc-card">
+        <div class="svc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <div class="svc-name">Web Development</div>
+        <div class="svc-desc">Modern, fast and responsive websites and web applications tailored to your brand and goals.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <div class="svc-name">System Development</div>
+        <div class="svc-desc">Custom business software systems that automate and streamline your entire operations.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg></div>
+        <div class="svc-name">Cloud Servers</div>
+        <div class="svc-desc">Scalable VPS setup, Nginx config, SSL, automated backups and cloud infrastructure management.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="svc-name">IT Security</div>
+        <div class="svc-desc">Firewall configuration, SSL/TLS setup, vulnerability assessment and security hardening.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="svc-name">IT Support & Maintenance</div>
+        <div class="svc-desc">24/7 technical support, system monitoring and ongoing maintenance to keep everything running.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
+        <div class="svc-name">Network Setup</div>
+        <div class="svc-desc">LAN/WAN design, WiFi, structured cabling, MikroTik and Cisco configuration.</div>
+      </div>
+
+      <!-- ERP Full Width -->
+      <div class="erp-full">
+        <div class="erp-head">
+          <div class="erp-ico">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <div class="erp-title">ERP System Implementation</div>
+            <div class="erp-sub">ERPNext · Frappe Framework · Full Setup & Training</div>
+          </div>
+        </div>
+        <p class="erp-desc">Complete ERPNext implementation from scratch — Chart of Accounts, module configuration, warehouses, cost centers, tax templates, payroll, manufacturing BOMs, and custom financial reports. I handle the full cycle so your business is fully operational from day one.</p>
+        <div class="erp-tags">
+          <span class="erp-tag">✓ Chart of Accounts</span>
+          <span class="erp-tag">✓ Accounting & Finance</span>
+          <span class="erp-tag">✓ Inventory Management</span>
+          <span class="erp-tag">✓ HR & Payroll</span>
+          <span class="erp-tag">✓ Manufacturing & BOM</span>
+          <span class="erp-tag">✓ Custom Reports</span>
+          <span class="erp-tag">✓ Tax & VAT Setup</span>
+          <span class="erp-tag">✓ Staff Training</span>
+          <span class="erp-tag">✓ Ongoing Support</span>
+          <span class="erp-tag">✓ Cost Centers</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-lbl" style="margin-top:28px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      How I Work
+    </div>
+    <div class="card" style="padding:0">
+      <div class="process">
+        <div class="proc-item" style="padding:14px 18px">
+          <div class="proc-n">01</div>
+          <div><div class="proc-title">Free Consultation</div><div class="proc-desc">We discuss your needs, goals, timeline and budget — no obligation required.</div></div>
+        </div>
+        <div class="proc-item" style="padding:14px 18px">
+          <div class="proc-n">02</div>
+          <div><div class="proc-title">Planning & Proposal</div><div class="proc-desc">I design the solution architecture and send a detailed, transparent proposal.</div></div>
+        </div>
+        <div class="proc-item" style="padding:14px 18px">
+          <div class="proc-n">03</div>
+          <div><div class="proc-title">Development</div><div class="proc-desc">Building your solution with clean, scalable and well-documented code or configuration.</div></div>
+        </div>
+        <div class="proc-item" style="padding:14px 18px">
+          <div class="proc-n">04</div>
+          <div><div class="proc-title">Testing & QA</div><div class="proc-desc">Thorough testing across all scenarios and devices before delivery.</div></div>
+        </div>
+        <div class="proc-item" style="padding:14px 18px;border-bottom:none">
+          <div class="proc-n">05</div>
+          <div><div class="proc-title">Launch & Support</div><div class="proc-desc">Go live with full training, documentation and ongoing technical support.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PROJECTS ════ -->
+  <div class="tab-page" id="tab-projects">
+    <div class="breadcrumb"><span>Home</span> / <strong>Projects</strong></div>
+    <div class="page-head">
+      <div class="page-head-left">
+        <div class="page-tag">Portfolio</div>
+        <h1 class="page-title">Recent Projects</h1>
+        <p class="page-sub">Solutions delivered for clients across Tanzania and beyond.</p>
+      </div>
+    </div>
+
+    <!-- Table view (desktop) -->
+    <div class="proj-table">
+      <div class="proj-table-hd">
+        <div>Project</div>
+        <div>Category</div>
+        <div>Description</div>
+        <div>Action</div>
+      </div>
+      <div class="proj-row">
+        <div><div class="proj-name">ERPNext Full Implementation</div><div class="proj-tech">ERPNext · Frappe · Python · MariaDB</div></div>
+        <div><span class="proj-tag">ERP System</span></div>
+        <div class="proj-desc-cell">Full ERPNext for aquaculture company — 450+ accounts CoA, biological assets, feed plant BOM, payroll, VAT/WHT reports.</div>
+        <div><button class="proj-link-btn">View <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></button></div>
+      </div>
+      <div class="proj-row">
+        <div><div class="proj-name">E-Commerce Platform</div><div class="proj-tech">React · Node.js · MySQL · M-Pesa</div></div>
+        <div><span class="proj-tag">Web Development</span></div>
+        <div class="proj-desc-cell">Full online store with M-Pesa/Tigo payments, product management, order tracking and admin dashboard.</div>
+        <div><button class="proj-link-btn">View <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></button></div>
+      </div>
+      <div class="proj-row">
+        <div><div class="proj-name">Cloud Migration & VPS Setup</div><div class="proj-tech">Ubuntu · Nginx · Docker · Bash</div></div>
+        <div><span class="proj-tag">Cloud Setup</span></div>
+        <div class="proj-desc-cell">Full VPS migration — Nginx reverse proxy, SSL, Docker containers, automated backups and monitoring.</div>
+        <div><button class="proj-link-btn">View <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></button></div>
+      </div>
+      <div class="proj-row">
+        <div><div class="proj-name">School Management System</div><div class="proj-tech">PHP · MySQL · Bootstrap · JS</div></div>
+        <div><span class="proj-tag">System Dev</span></div>
+        <div class="proj-desc-cell">Student registration, fees, attendance, exams, report cards and parent portal for private school.</div>
+        <div><button class="proj-link-btn">View <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></button></div>
+      </div>
+      <div class="proj-row">
+        <div><div class="proj-name">Office Network Setup</div><div class="proj-tech">MikroTik · Cisco · VLAN · pfSense</div></div>
+        <div><span class="proj-tag">IT Services</span></div>
+        <div class="proj-desc-cell">Full network design — structured cabling, VLAN segmentation, managed switches, WiFi and firewall.</div>
+        <div><button class="proj-link-btn">View <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></button></div>
+      </div>
+    </div>
+
+    <!-- Card view (mobile) -->
+    <div class="proj-cards">
+      <div class="proj-card"><div class="pc-top"><span class="proj-tag">ERP System</span></div><div class="pc-name">ERPNext Full Implementation</div><p class="pc-desc">Full ERPNext for aquaculture company — 450+ CoA accounts, biological assets, feed plant BOM, payroll, VAT/WHT.</p><div class="pills"><span class="pill">ERPNext</span><span class="pill">Frappe</span><span class="pill">Python</span><span class="pill">MariaDB</span></div></div>
+      <div class="proj-card"><div class="pc-top"><span class="proj-tag">Web Dev</span></div><div class="pc-name">E-Commerce Platform</div><p class="pc-desc">Full online store with M-Pesa/Tigo payments, product catalogue, order tracking and admin dashboard.</p><div class="pills"><span class="pill">React</span><span class="pill">Node.js</span><span class="pill">MySQL</span><span class="pill">M-Pesa</span></div></div>
+      <div class="proj-card"><div class="pc-top"><span class="proj-tag">Cloud</span></div><div class="pc-name">Cloud Migration & VPS Setup</div><p class="pc-desc">Full VPS migration — Nginx, SSL, Docker containers, automated backups and monitoring dashboards.</p><div class="pills"><span class="pill">Ubuntu</span><span class="pill">Nginx</span><span class="pill">Docker</span><span class="pill">Bash</span></div></div>
+      <div class="proj-card"><div class="pc-top"><span class="proj-tag">System Dev</span></div><div class="pc-name">School Management System</div><p class="pc-desc">Student registration, fees, attendance, exams, report cards and parent portal.</p><div class="pills"><span class="pill">PHP</span><span class="pill">MySQL</span><span class="pill">Bootstrap</span></div></div>
+      <div class="proj-card"><div class="pc-top"><span class="proj-tag">IT Services</span></div><div class="pc-name">Office Network Setup</div><p class="pc-desc">Full office network — VLAN, managed switches, WiFi access points, MikroTik firewall.</p><div class="pills"><span class="pill">MikroTik</span><span class="pill">Cisco</span><span class="pill">VLAN</span></div></div>
+    </div>
+  </div>
+
+  <!-- ════ SKILLS ════ -->
+  <div class="tab-page" id="tab-skills">
+    <div class="breadcrumb"><span>Home</span> / <strong>Skills</strong></div>
+    <div class="page-head">
+      <div class="page-head-left">
+        <div class="page-tag">Tech Stack</div>
+        <h1 class="page-title">Skills & Expertise</h1>
+        <p class="page-sub">Technologies and tools I use to deliver professional IT solutions.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="align-items:start">
+      <div>
+        <div class="sec-lbl" style="margin-top:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Proficiency
+        </div>
+        <div class="skill-list" id="skillList">
+          <div class="skill-item">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div>
+            <div class="sk-name">ERPNext / Frappe</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="95"></div></div>
+            <div class="sk-pct">95%</div>
+          </div>
+          <div class="skill-item">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></div>
+            <div class="sk-name">Web Development</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="92"></div></div>
+            <div class="sk-pct">92%</div>
+          </div>
+          <div class="skill-item">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg></div>
+            <div class="sk-name">Cloud & Linux</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="90"></div></div>
+            <div class="sk-pct">90%</div>
+          </div>
+          <div class="skill-item">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+            <div class="sk-name">Python</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="88"></div></div>
+            <div class="sk-pct">88%</div>
+          </div>
+          <div class="skill-item">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+            <div class="sk-name">JavaScript / React</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="85"></div></div>
+            <div class="sk-pct">85%</div>
+          </div>
+          <div class="skill-item">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="10" ry="4"/><path d="M2 12c0 2.2 4.5 4 10 4s10-1.8 10-4"/></svg></div>
+            <div class="sk-name">Databases</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="87"></div></div>
+            <div class="sk-pct">87%</div>
+          </div>
+          <div class="skill-item">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/></svg></div>
+            <div class="sk-name">Networking</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="83"></div></div>
+            <div class="sk-pct">83%</div>
+          </div>
+          <div class="skill-item" style="border-bottom:none">
+            <div class="sk-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="sk-name">Docker / DevOps</div>
+            <div class="sk-bar-wrap"><div class="sk-bar" data-w="82"></div></div>
+            <div class="sk-pct">82%</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-lbl" style="margin-top:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Tools & Platforms
+        </div>
+        <div class="tool-grid">
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>GitHub</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Nginx</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Ubuntu</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Docker</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>ERPNext</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Frappe</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/></svg>React</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="12" rx="10" ry="4"/><path d="M2 12c0 2.2 4.5 4 10 4s10-1.8 10-4"/></svg>MariaDB</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/></svg>MikroTik</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>SSL/TLS</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Bash</div>
+          <div class="tool-item"><svg class="tool-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>VS Code</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ CONTACT ════ -->
+  <div class="tab-page" id="tab-contact">
+    <div class="breadcrumb"><span>Home</span> / <strong>Contact</strong></div>
+    <div class="page-head">
+      <div class="page-head-left">
+        <div class="page-tag">Get In Touch</div>
+        <h1 class="page-title">Let's Work Together</h1>
+        <p class="page-sub">Have a project in mind? Reach out — free consultation available.</p>
+      </div>
+    </div>
+
+    <div class="contact-grid">
+      <div>
+        <a href="tel:+255773500811" class="contact-link">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.9a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div><div class="c-lbl">Phone</div><div class="c-val">+255 773 500 811</div></div>
+          <svg class="c-arr" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a href="mailto:atilioobadia@gmail.com" class="contact-link">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div><div class="c-lbl">Email</div><div class="c-val">atilioobadia@gmail.com</div></div>
+          <svg class="c-arr" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a href="https://wa.me/255773500811" class="contact-link" target="_blank">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div><div class="c-lbl">WhatsApp</div><div class="c-val">Chat on WhatsApp</div></div>
+          <svg class="c-arr" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a href="https://github.com/atilioobadia-cpu" class="contact-link" target="_blank">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div>
+          <div><div class="c-lbl">GitHub</div><div class="c-val">github.com/atilioobadia</div></div>
+          <svg class="c-arr" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a href="https://linkedin.com/in/eng-atilioobadia" class="contact-link" target="_blank">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
+          <div><div class="c-lbl">LinkedIn</div><div class="c-val">Eng Atilio Obadia</div></div>
+          <svg class="c-arr" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+
+      <div>
+        <div class="cta-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="margin-bottom:10px;opacity:.7"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <h3>Ready to Start Your Project?</h3>
+          <p>Free consultation available. Let's discuss your needs and build the right IT solution for your business.</p>
+          <a href="mailto:atilioobadia@gmail.com" class="btn-white">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Send a Message
+          </a>
+          <div class="cta-trust">
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Free Consultation</span>
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Fast Response</span>
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 100% Confidential</span>
+          </div>
+        </div>
+
+        <div class="loc-card">
+          <div class="c-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div>
+            <div style="font-size:.82rem;font-weight:600;color:var(--text)">Based in Tanzania 🇹🇿</div>
+            <div style="font-size:.72rem;color:var(--muted)">Mwanza · Available Remotely Worldwide</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main-wrap -->
+
+<!-- FOOTER -->
+<footer id="footer">
+  <span>© 2025 <strong>Atilio Obadia</strong> · erp.atilio · Tanzania</span>
+  <span style="color:var(--muted2)">IT Solutions Expert</span>
+</footer>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mob-nav">
+  <button class="mn-btn active" id="mob-home" onclick="showTab('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="mn-btn" id="mob-services" onclick="showTab('services')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Services
+  </button>
+  <button class="mn-btn" id="mob-projects" onclick="showTab('projects')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    Work
+  </button>
+  <button class="mn-btn" id="mob-skills" onclick="showTab('skills')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    Skills
+  </button>
+  <button class="mn-btn" id="mob-contact" onclick="showTab('contact')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    Contact
+  </button>
+</nav>
+
+<script>
+// ── STATE ──────────────────────────────────────
+let currentTab = 'home';
+let sidebarCollapsed = false;
+let switching = false;
+
+// ── SHOW TAB — clean smooth transition ────────
+function showTab(id) {
+  if (id === currentTab || switching) return;
+  switching = true;
+
+  const outPage = document.getElementById('tab-' + currentTab);
+  const inPage  = document.getElementById('tab-' + id);
+  if (!inPage) { switching = false; return; }
+
+  // Show loading on clicked nav item (brief spinner)
+  const clickedNav = document.getElementById('nav-' + id);
+  if (clickedNav) {
+    clickedNav.classList.add('loading');
+    setTimeout(() => clickedNav.classList.remove('loading'), 400);
+  }
+
+  // Update nav active state immediately
+  updateNav(id);
+
+  // Swap pages — CSS @keyframes handles the animation
+  outPage.classList.remove('active');
+  inPage.classList.add('active');
+
+  currentTab = id;
+  switching = false;
+
+  // Animate skills bars
+  if (id === 'skills') setTimeout(animateSkills, 200);
+
+  window.scrollTo(0, 0);
+}
+
+function updateNav(id) {
+  // Sidebar
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sbn = document.getElementById('nav-' + id);
+  if (sbn) sbn.classList.add('active');
+
+  // Mobile
+  document.querySelectorAll('.mn-btn').forEach(n => n.classList.remove('active'));
+  const mbn = document.getElementById('mob-' + id);
+  if (mbn) mbn.classList.add('active');
+}
+
+// ── SIDEBAR TOGGLE ────────────────────────────
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+  document.getElementById('mainWrap').classList.toggle('collapsed', sidebarCollapsed);
+  document.getElementById('footer').classList.toggle('collapsed', sidebarCollapsed);
+}
+
+// ── SKILL BARS ────────────────────────────────
+let skillsAnimated = false;
+function animateSkills() {
+  if (skillsAnimated) return;
+  skillsAnimated = true;
+  document.querySelectorAll('.sk-bar[data-w]').forEach((bar, i) => {
+    setTimeout(() => {
+      bar.style.width = bar.getAttribute('data-w') + '%';
+    }, i * 60);
+  });
+}
+</script>
+</body>
+</html>
